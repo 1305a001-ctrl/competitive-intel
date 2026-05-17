@@ -1,0 +1,46 @@
+# Append to ai-primary's docker-compose.yml. Lives alongside the existing
+# 24-container stack. Uses the shared `trading-net` and Redis backbone.
+
+services:
+  competitive-intel:
+    image: ghcr.io/1305a001-ctrl/competitive-intel:latest
+    container_name: competitive-intel
+    restart: unless-stopped
+    environment:
+      # 4-hour daily-skim cadence per spec
+      SKIM_INTERVAL_SEC: "14400"
+      # LLM endpoint on ai-edge
+      LOCAL_LLM_BASE_URL: "http://ai-edge:8030"
+      LOCAL_LLM_TIMEOUT_SEC: "30"
+      # Redis on ai-primary
+      REDIS_URL: "redis://redis:6379"
+      # pa-agent already drains this stream
+      PA_NOTIFICATIONS_STREAM: "pa:notifications"
+      # Alert gating
+      ALERT_MIN_CONFIDENCE: "0.7"
+      # Watchlist + signal log inside the container
+      WATCHLIST_PATH: "/app/data/watchlist.yaml"
+      SIGNAL_LOG_PATH: "/var/lib/competitive-intel/signal-log.jsonl"
+    volumes:
+      # Live-edit the watchlist without rebuilding
+      - ./competitive-intel/data/watchlist.yaml:/app/data/watchlist.yaml:ro
+      # Persist the JSONL signal log across restarts
+      - competitive_intel_log:/var/lib/competitive-intel
+    networks:
+      - trading-net
+    depends_on:
+      - redis
+    healthcheck:
+      # Container is healthy as long as the python process is alive;
+      # no HTTP server runs. We use a python -c liveness probe.
+      test: ["CMD", "python", "-c", "import competitive_intel; print('ok')"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  competitive_intel_log:
+
+networks:
+  trading-net:
+    external: true

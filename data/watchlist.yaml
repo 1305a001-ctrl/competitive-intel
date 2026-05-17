@@ -1,0 +1,363 @@
+# Competitive-intel watchlist — derived from competitive-intelligence-
+# framework §3. Each entry lists upstream dependencies + substitute
+# threats so the scanner can match signals back to the affected build.
+#
+# Update this file when the master plan changes. The scanner reloads it
+# every cycle — no restart needed.
+
+builds:
+
+  # ── Track 1 — Trading book ───────────────────────────────────────
+
+  T1.01:
+    name: Polymarket Compound Engine
+    track: 1
+    status: active
+    upstream:
+      - polymarket uma oracle
+      - polymarket order book api
+      - polymarket
+      - usdc peg
+      - usdc
+      - chainlink data streams
+    substitutes:
+      - kalshi
+      - limitless
+      - drift bet
+      - drift protocol
+    keywords:
+      - prediction market
+      - polymarket v3
+      - uma oracle
+    existential:
+      - polymarket 5m
+      - polymarket 15m
+
+  T1.02:
+    name: Liquidation Bot
+    track: 1
+    status: degraded
+    upstream:
+      - goldsky
+      - chainlink data streams
+      - aave v3
+      - aave oracle
+    substitutes:
+      - atlas
+      - atlas solver
+      - hexagate
+      - gauntlet
+    keywords:
+      - svr
+      - liquidation
+      - smart value recapture
+      - morpho
+      - fluid
+      - compound v3
+      - silo
+    existential:
+      - svr expansion
+
+  T1.03:
+    name: OCDE Multiplier
+    track: 1
+    status: active
+    upstream:
+      - pyth hermes
+      - pyth network
+      - chainlink data streams
+      - publisher tier
+    substitutes:
+      - kaiko
+      - amberdata
+      - redstone
+    keywords:
+      - publisher dispersion
+      - cross-oracle signal
+    existential:
+      - pyth per-publisher deprecation
+      - publisher feed deprecation
+
+  T1.04:
+    name: Tokenized Equities
+    track: 1
+    status: active
+    upstream:
+      - xstocks
+      - backed finance
+      - kraken
+      - bybit
+      - xchange
+      - cme futures
+    substitutes:
+      - tradfi prop desks
+      - prop desk tokenized
+    keywords:
+      - tokenized equity
+      - tokenized stocks
+      - etf tokenization
+      - 24/7 equity
+
+  T1.05:
+    name: On-Chain Forex
+    track: 1
+    status: active
+    upstream:
+      - chainlink ncfx
+      - chainlink fx
+      - dforce
+      - synthetix fx
+    substitutes:
+      - tradfi fx
+    keywords:
+      - sea currency
+      - on-chain fx
+      - mas regulation
+      - singapore forex
+
+  T1.06:
+    name: GMX Funding Rate Arb
+    track: 1
+    status: active
+    upstream:
+      - gmx v2
+      - gmx funding
+      - binance spot
+      - binance perp
+      - bybit spot
+      - bybit perp
+      - gmx keeper
+    substitutes:
+      - hyperliquid
+    keywords:
+      - gmx v2.2
+      - gmx v2.3
+      - hyperliquid funding
+      - perp venue
+
+  T1.07:
+    name: Polymarket-as-Oracle Cross-Venue
+    track: 1
+    status: active
+    upstream:
+      - polymarket
+      - polymarket gamma
+      - usdc
+    substitutes:
+      - kalshi
+    keywords:
+      - prediction market oracle
+      - cross-venue arb
+
+  T1.08:
+    name: News-Driven Crypto Momentum
+    track: 1
+    status: active
+    upstream:
+      - news consolidator
+      - chainlink data streams
+    substitutes:
+      - santiment
+      - kaiko news sentiment
+    keywords:
+      - news sentiment
+      - llm news classifier
+
+  T1.09:
+    name: Liq-Cascade Momentum
+    track: 1
+    status: active
+    upstream:
+      - binance forceOrder
+      - liquidation feeds
+    substitutes:
+      - coinglass
+      - laevitas
+    keywords:
+      - cascade
+      - forced liquidation
+      - liq cluster
+
+  T1.10:
+    name: HYPE Basis Trade
+    track: 1
+    status: active
+    upstream:
+      - hype token
+      - hyperliquid perps
+      - hyperliquid spot
+    substitutes:
+      - hyperliquid native basis
+    keywords:
+      - hype unlock
+      - contributor unlock
+      - hype etf
+
+  # ── Track 2 — Pitches ─────────────────────────────────────────────
+
+  T2.01:
+    name: Liquidity Pulse Protocol
+    track: 2
+    status: active
+    upstream:
+      - chainlink lwba
+      - lwba
+    substitutes:
+      - chainlink labs
+      - kaiko
+      - amberdata
+    keywords:
+      - spread analytics
+      - microstructure
+      - protocol sdk
+
+  T2.02:
+    name: Continuous NAV Oracle
+    track: 2
+    status: active
+    upstream:
+      - polygon.io
+      - bloomberg quote
+      - chainlink custom feed
+    substitutes:
+      - redstone
+      - pyth nav
+    keywords:
+      - nav oracle
+      - rwa fund
+      - rwa oracle
+
+  T2.03:
+    name: HYPE Infrastructure Layer
+    track: 2
+    status: re_evaluating
+    upstream:
+      - hyperliquid labs
+      - hype data streams
+      - hyperevm
+    substitutes:
+      - felix protocol
+      - hyperlend
+      - hyperevm lending
+    keywords:
+      - hyperliquid native lending
+      - hyperevm protocol
+      - hype etf
+
+  T2.04:
+    name: On-Chain Forex Stack
+    track: 2
+    status: active
+    upstream:
+      - chainlink sea-fx
+      - singapore pte ltd
+    substitutes:
+      - tradfi fx tokenization
+      - dforce sea
+    keywords:
+      - bis on-chain fx
+      - mas on-chain fx
+      - sea remittance on-chain
+
+  T2.05:
+    name: Sub-Second Settlement Prediction Markets
+    track: 2
+    status: active
+    upstream:
+      - chainlink data streams
+      - uae regulation
+    substitutes:
+      - polymarket sub-second oracle
+      - kalshi defi
+    keywords:
+      - polymarket v3
+      - cftc action
+      - kalshi infrastructure
+
+  T2.06:
+    name: Chainlink Node Operator
+    track: 2
+    status: active
+    upstream:
+      - chainlink approval
+      - link price
+      - chainlink network
+    substitutes: []
+    keywords:
+      - node operator selection
+      - chainlink staking
+      - staking tier
+
+  # ── Track 3 — Customer-facing ────────────────────────────────────
+
+  T3.01:
+    name: Hyperliquid Orderflow Intelligence
+    track: 3
+    status: active
+    upstream:
+      - hyperliquid api
+      - hyperliquid builder code
+    substitutes:
+      - kiyotaka
+      - hyperrpc
+      - hyperliquid analytics
+    keywords:
+      - kiyotaka roadmap
+      - hyperliquid dashboard
+      - builder code analytics
+
+  T3.02:
+    name: Whop Signal Channel
+    track: 3
+    status: active
+    upstream:
+      - whop platform
+    substitutes:
+      - smart money flow channel
+      - oracle divergence channel
+    keywords:
+      - whop signal
+      - paid signal channel
+
+  T3.03:
+    name: The Pulse Newsletter
+    track: 3
+    status: active
+    upstream:
+      - newsletter platform
+    substitutes:
+      - thanefield
+      - crypto research newsletter
+    keywords:
+      - cross-oracle newsletter
+      - research arm publication
+
+  T3.04:
+    name: Tokenized Equities Orderflow
+    track: 3
+    status: active
+    upstream:
+      - tokenized equity venues
+    substitutes:
+      - kiyotaka
+      - dune dashboards
+      - backed finance native
+    keywords:
+      - dune spellbook
+      - backed analytics
+      - tokenized equity dashboard
+
+  T3.05:
+    name: Liquidation Pulse API
+    track: 3
+    status: active
+    upstream:
+      - aave subgraphs
+      - chainlink data streams
+    substitutes:
+      - gauntlet
+      - chaos labs
+      - llamarisk
+    keywords:
+      - real-time liquidation risk
+      - liquidation api

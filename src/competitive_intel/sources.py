@@ -53,7 +53,9 @@ def _entry_published(entry: Any) -> str:
         val = getattr(entry, key, None) or (entry.get(key) if isinstance(entry, dict) else None)
         if val:
             try:
-                return datetime(*val[:6], tzinfo=UTC).isoformat()
+                # mypy can't prove the unpacked 6-tuple won't collide with the
+                # tzinfo kwarg; it's valid at runtime (year..second + tzinfo).
+                return datetime(*val[:6], tzinfo=UTC).isoformat()  # type: ignore[misc]
             except (TypeError, ValueError):
                 pass
     return datetime.now(UTC).isoformat()
@@ -230,23 +232,41 @@ FETCHERS = (
 )
 
 
+def active_fetchers() -> tuple[Any, ...]:
+    """The fetcher list for this run.
+
+    Always includes the original v0.1 ``FETCHERS``. Additively appends the
+    venue-coverage fetchers (Snapshot/Discourse/GDELT) when
+    ``settings.venue_coverage_enabled`` is on. Importing ``venues`` here
+    (not at module top) avoids a circular import (venues imports RawSignal
+    from this module).
+    """
+    if not settings.venue_coverage_enabled:
+        return FETCHERS
+    from competitive_intel.venues import VENUE_FETCHERS
+
+    return (*FETCHERS, *VENUE_FETCHERS)
+
+
 async def fetch_all() -> list[RawSignal]:
-    """Run every registered fetcher concurrently; merge results.
+    """Run every active fetcher concurrently; merge results.
 
     Any fetcher that raises returns [] thanks to its own fail-OPEN
     wrapper. We do NOT cancel sibling fetches on partial failure.
     """
+    import asyncio
+
+    fetchers = active_fetchers()
     out: list[RawSignal] = []
     async with httpx.AsyncClient(
         timeout=settings.http_timeout_sec,
         follow_redirects=True,
-        headers={"User-Agent": "competitive-intel/0.1 (+https://github.com/1305a001-ctrl/competitive-intel)"},
+        headers={"User-Agent": "competitive-intel/0.2 (+https://github.com/1305a001-ctrl/competitive-intel)"},
     ) as client:
-        import asyncio
         results = await asyncio.gather(
-            *(fn(client) for fn in FETCHERS), return_exceptions=True,
+            *(fn(client) for fn in fetchers), return_exceptions=True,
         )
-        for fn, res in zip(FETCHERS, results, strict=True):
+        for fn, res in zip(fetchers, results, strict=True):
             if isinstance(res, BaseException):
                 log.warning("fetcher.crashed name=%s err=%s", fn.__name__, res)
                 continue

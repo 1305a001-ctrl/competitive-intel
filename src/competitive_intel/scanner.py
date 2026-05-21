@@ -26,7 +26,7 @@ from typing import Any
 
 import redis.asyncio as redis_asyncio
 
-from competitive_intel import alerter, classifier, signal_log, sources
+from competitive_intel import alerter, classifier, lane_impact, signal_log, sources
 from competitive_intel.settings import settings
 from competitive_intel.watchlist import Build, load_watchlist, match_signal
 
@@ -97,6 +97,7 @@ async def run_once(
     )
 
     alerted_count = 0
+    structural_count = 0
     logged_count = 0
     for raw_signal in fresh:
         sig_dict = raw_signal.as_dict()
@@ -127,6 +128,34 @@ async def run_once(
                     "scanner.alert_emitted type=%s conf=%.2f builds=%s url=%s",
                     cls["type"], cls["confidence"], matched, raw_signal.url,
                 )
+
+        # ── lane-viability radar (independent of the LLM gate) ──
+        # Deterministic structural scoring on the LLM-enriched signal. Fires
+        # even when the LLM is down (confidence 0.0) — this is the fix for the
+        # Atlas miss. Outbound notification is gated off by default; persist +
+        # log always happen so the radar is observable.
+        structural_alerted = False
+        impact = lane_impact.score_lane_impact(
+            enriched, critical_severity=settings.structural_alert_min_severity,
+        )
+        if impact.critical:
+            record = alerter.build_structural_alert(sig_dict, impact, cls)
+            try:
+                status = await alerter.dispatch_structural_alert(r, record)
+            except Exception as exc:  # noqa: BLE001
+                log.error("scanner.structural_dispatch_failed err=%s", exc)
+                status = {"persisted": [], "outbound_sent": False}
+            structural_alerted = bool(status.get("persisted")) or bool(
+                status.get("outbound_sent")
+            )
+            if structural_alerted:
+                structural_count += 1
+                log.info(
+                    "scanner.structural_alert lanes=%s sev=%.2f outbound=%s url=%s",
+                    impact.lanes, impact.severity,
+                    status.get("outbound_sent"), raw_signal.url,
+                )
+
         # always log, alerted or not
         row = signal_log.build_log_row(
             signal=sig_dict,
@@ -134,6 +163,10 @@ async def run_once(
             matched_builds=matched,
             alerted=alerted,
         )
+        # annotate the log row with the structural verdict (additive keys)
+        row["structural_critical"] = impact.critical
+        row["structural_alerted"] = structural_alerted
+        row["lane_impact"] = impact.as_dict()
         try:
             signal_log.append_row(settings.signal_log_path, row)
             logged_count += 1
@@ -145,6 +178,7 @@ async def run_once(
         "fetched": len(fetched),
         "fresh": len(fresh),
         "alerted": alerted_count,
+        "structural_alerted": structural_count,
         "logged": logged_count,
     }
 

@@ -16,8 +16,17 @@ services:
       REDIS_URL: "redis://redis:6379"
       # pa-agent already drains this stream
       PA_NOTIFICATIONS_STREAM: "pa:notifications"
-      # Alert gating
+      # Alert gating (LLM-driven competitive-intel alerts)
       ALERT_MIN_CONFIDENCE: "0.7"
+      # Venue coverage (Snapshot/Discourse/GDELT). Additive; on by default.
+      VENUE_COVERAGE_ENABLED: "true"
+      # Lane-viability radar (structural-event alerts).
+      STRUCTURAL_ALERT_MIN_SEVERITY: "0.6"
+      # KEEP FALSE until the radar has been observed in prod — when false,
+      # structural alerts are persisted to news:structural_alert:* + the
+      # signal log but NOT pushed to pa-agent/Telegram. Flipping to "true"
+      # is the only change that turns on outbound structural notifications.
+      STRUCTURAL_ALERT_OUTBOUND_ENABLED: "false"
       # Watchlist + signal log inside the container
       WATCHLIST_PATH: "/app/data/watchlist.yaml"
       SIGNAL_LOG_PATH: "/var/lib/competitive-intel/signal-log.jsonl"

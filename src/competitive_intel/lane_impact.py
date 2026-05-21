@@ -151,7 +151,12 @@ _REGULATORY_PATTERNS = (
     r"\bregulat(?:e|es|ed|ion|or|ory)\b",
     r"\bsanction(?:s|ed)?\b",
     r"\bcease\s+and\s+desist\b",
-    r"\bban(?:s|ned|ning)?\b",
+    # "ban" only counts as regulatory when tied to a market/crypto object.
+    # A bare "banned" (e.g. a forum "discord bot banned me" thread) is noise,
+    # not a lane-altering regulatory action — it was the boot-skim false
+    # positive (sev 0.75) that motivated this tightening (2026-05-22).
+    r"\bban(?:s|ned|ning)?\b\W+(?:\w+\W+){0,3}?(?:crypto|trading|token|derivativ\w*|stablecoin|perp|exchange|asset)\b",
+    r"\b(?:crypto|trading|derivativ\w*|stablecoin|token|perp)\W+(?:\w+\W+){0,2}?ban(?:s|ned|ning)?\b",
 )
 
 # kind -> (compiled patterns, base severity)

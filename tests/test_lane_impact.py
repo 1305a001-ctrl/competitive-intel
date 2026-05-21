@@ -144,6 +144,36 @@ def test_regulatory_action_on_polymarket_is_critical():
     assert "REGULATORY" in impact.event_kinds
 
 
+def test_discord_bot_ban_forum_thread_is_not_critical():
+    """Boot-skim false positive (2026-05-22): a bare 'banned' in an Aave forum
+    thread (source string contains 'aave', so the lane matches trivially) must
+    NOT score REGULATORY any more — it's noise, not a lane-altering event."""
+    impact = score_lane_impact(
+        {
+            "title": "Discord bot banned me from the server",
+            "body": "",
+            "source": "aave_discourse",
+        }
+    )
+    assert "REGULATORY" not in impact.event_kinds
+    assert impact.critical is False
+
+
+def test_crypto_trading_ban_still_regulatory():
+    """A 'ban' tied to a market/crypto object still fires REGULATORY (both
+    word orders), so real bans aren't lost by the tightening."""
+    assert "REGULATORY" in dict(detect_event_kinds("a crypto trading ban is coming"))
+    assert "REGULATORY" in dict(detect_event_kinds("regulator bans crypto derivatives"))
+    impact = score_lane_impact(
+        {
+            "title": "China bans crypto trading on all exchanges",
+            "body": "",
+            "source": "gdelt",
+        }
+    )
+    assert "REGULATORY" in impact.event_kinds
+
+
 def test_delisting_on_traded_venue_is_critical():
     impact = score_lane_impact(
         {"title": "Hyperliquid delists three perp markets", "body": "", "source": "gdelt"}

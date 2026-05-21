@@ -45,6 +45,47 @@ class Settings(BaseSettings):
     alert_min_confidence: float = 0.7
     alert_types: tuple[str, ...] = ("DISPLACE", "SUBSTITUTE")
 
+    # --- venue coverage (slice a) ---
+    # Master switch for the new venue fetchers (Snapshot/Discourse/GDELT).
+    # ON by default in code — but additive: it only ADDS sources, never
+    # changes the existing 8. Set false to disable venue coverage entirely.
+    venue_coverage_enabled: bool = True
+    # Snapshot GraphQL hub (free, no key).
+    src_snapshot_graphql: str = "https://hub.snapshot.org/graphql"
+    # Governance spaces to watch. aavedao.eth = Aave DAO (944 proposals),
+    # gmx.eth = GMX (75). Add more space IDs as lanes grow.
+    snapshot_spaces: tuple[str, ...] = ("aavedao.eth", "gmx.eth")
+    # Aave governance forum (Discourse). latest.json is the stable JSON feed.
+    src_aave_discourse_latest: str = "https://governance.aave.com/latest.json"
+    src_aave_discourse_base: str = "https://governance.aave.com"
+    # GMX governance forum (Discourse).
+    src_gmx_discourse_latest: str = "https://gov.gmx.io/latest.json"
+    src_gmx_discourse_base: str = "https://gov.gmx.io"
+    # GDELT DOC 2.0 free news index. Query targets structural events naming
+    # one of our venues; timespan keeps the feed recent.
+    src_gdelt_doc: str = "https://api.gdeltproject.org/api/v2/doc/doc"
+    gdelt_query: str = (
+        '(polymarket OR hyperliquid OR aave OR chainlink OR "tokenized equities") '
+        "(acquisition OR oracle OR regulation OR delisting OR lawsuit OR sec)"
+    )
+    gdelt_timespan: str = "3d"
+
+    # --- structural-event lane-impact alert layer (slice a) ---
+    # Severity floor at/above which a lane impact is treated as alert-worthy.
+    structural_alert_min_severity: float = 0.6
+    # Redis namespaces for structural alerts (registered in signals_bus.md).
+    # Per-lane stream of structural alerts.
+    structural_alert_stream_prefix: str = "news:structural_alert"
+    # Current-state string: the most recent structural alert (any lane).
+    structural_alert_latest_key: str = "news:structural_alert:latest"
+    # Stream cap (approximate XADD maxlen).
+    structural_alert_stream_maxlen: int = 5_000
+    # GATE: when False (default) structural alerts are logged + persisted to
+    # Redis + the signal log, but NO outbound notification (pa-agent/Telegram)
+    # is sent. Flip to true ONLY after the radar has been observed in prod.
+    # This is what keeps merging this PR from spamming the operator.
+    structural_alert_outbound_enabled: bool = False
+
     # --- Source URLs (RSS / HTTP) ---
     # Aave governance forum (Discourse instance — Discourse exposes .rss
     # on every category URL).

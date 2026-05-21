@@ -7,7 +7,7 @@ where = ["src"]
 
 [project]
 name = "competitive-intel"
-version = "0.1.0"
+version = "0.2.0"
 description = "Continuous competitive intelligence scanner — classifies governance/news signals (DISPLACE/UNLOCK/SUBSTITUTE/REGIME) against per-build watchlists and alerts via Telegram."
 requires-python = ">=3.11"
 dependencies = [
@@ -37,6 +37,13 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src"]
+# Several runtime deps (feedparser, yaml) ship without type stubs / py.typed.
+# Ignoring missing imports keeps the type-check focused on our own code.
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
